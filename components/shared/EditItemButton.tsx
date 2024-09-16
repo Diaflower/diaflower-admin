@@ -7,32 +7,44 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Pencil } from 'lucide-react';
-import { updateItem } from '@/data/categoriesOrTags';
+import { updateItem, updateCoupon } from '@/data/categoriesOrTags';
 import { toast } from "@/components/ui/use-toast";
-import { Item , ItemType} from '@/types/types';
+import { Item, ItemType, Coupon } from '@/types/types';
 import { ColorPicker } from './ColorPicker';
 import { FileUpload } from './FileUpload';
 import { ImagePreview } from './ImagePreview';
 
 interface EditItemButtonProps {
-  item: Item;
+  item: Item | Coupon;
   itemType: ItemType;
   onUpdate: () => void;
 }
 
 export default function EditItemButton({ item, itemType, onUpdate }: EditItemButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [nameEn, setNameEn] = useState(item.name_en || '');
-  const [nameAr, setNameAr] = useState(item.name_ar || '');
-  const [altTextEn, setAltTextEn] = useState(item.image?.altText_en || '');
-  const [altTextAr, setAltTextAr] = useState(item.image?.altText_ar || '');
-  const [color, setColor] = useState(item.color || '');
+  const [nameEn, setNameEn] = useState((item as Item).name_en || (item as Coupon).name || '');
+  const [nameAr, setNameAr] = useState((item as Item).name_ar || '');
+  const [altTextEn, setAltTextEn] = useState((item as Item).altText_en || '');
+  const [altTextAr, setAltTextAr] = useState((item as Item).altText_ar || '');
+  const [color, setColor] = useState((item as Item).color || '');
   const [image, setImage] = useState<File | null>(null);
+  const [code, setCode] = useState((item as Coupon).code || '');
+  const [discount, setDiscount] = useState(((item as Coupon).discount || 0).toString());
+  const [expiryDate, setExpiryDate] = useState((item as Coupon).expiryDate ? new Date((item as Coupon).expiryDate).toISOString().split('T')[0] : '');
   const [isLoading, setIsLoading] = useState(false);
   const { getToken } = useAuth();
 
   const handleUpdateItem = async () => {
-    if (!nameEn || !nameAr) {
+    if (itemType === 'coupons') {
+      if (!nameEn || !code || !discount || !expiryDate) {
+        toast({
+          title: "Error",
+          description: "All fields are required for coupons.",
+          variant: "destructive",
+        });
+        return;
+      }
+    } else if (!nameEn || !nameAr) {
       toast({
         title: "Error",
         description: "Both English and Arabic names are required.",
@@ -41,15 +53,13 @@ export default function EditItemButton({ item, itemType, onUpdate }: EditItemBut
       return;
     }
 
-    if (itemType === 'infinityColors' || itemType === 'boxColors') {
-      if (!color || !image) {
-        toast({
-          title: "Error",
-          description: "Both color and image are required.",
-          variant: "destructive",
-        });
-        return;
-      }
+    if ((itemType === 'infinityColors' || itemType === 'boxColors' || itemType === 'wrappingColors') && !color) {
+      toast({
+        title: "Error",
+        description: "Color is required for this item type.",
+        variant: "destructive",
+      });
+      return;
     }
   
     setIsLoading(true);
@@ -58,7 +68,15 @@ export default function EditItemButton({ item, itemType, onUpdate }: EditItemBut
       if (!token) throw new Error('No authentication token available');
   
       let data: any;
-      if (itemType === 'infinityColors' || itemType === 'boxColors') {
+      if (itemType === 'coupons') {
+        data = {
+          name: nameEn,
+          code,
+          discount: parseFloat(discount),
+          expiryDate: new Date(expiryDate).toISOString(),
+        };
+        await updateCoupon(item.id as string, data, token);
+      } else if (itemType === 'infinityColors' || itemType === 'boxColors' || itemType === 'wrappingColors') {
         const formData = new FormData();
         formData.append('name_en', nameEn);
         formData.append('name_ar', nameAr);
@@ -66,20 +84,17 @@ export default function EditItemButton({ item, itemType, onUpdate }: EditItemBut
         
         if (image instanceof File) {
           formData.append('image', image);
-        } else if (typeof image === 'string') {
-          formData.append('imageUrl', image);
-        } else {
-          throw new Error('Image is required');
         }
   
         formData.append('altText_en', altTextEn);
         formData.append('altText_ar', altTextAr);
         data = formData;
+        await updateItem(itemType, item.id as number, data, token);
       } else {
         data = { name_en: nameEn, name_ar: nameAr };
+        await updateItem(itemType, item.id as number, data, token);
       }
   
-      await updateItem(itemType, item.id, data, token);
       setIsOpen(false);
       toast({
         title: `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} Updated`,
@@ -106,6 +121,7 @@ export default function EditItemButton({ item, itemType, onUpdate }: EditItemBut
     switch (itemType) {
       case 'infinityColors':
       case 'boxColors':
+      case 'wrappingColors':
         return (
           <>
             <div className="grid grid-cols-4 items-center gap-4">
@@ -172,6 +188,57 @@ export default function EditItemButton({ item, itemType, onUpdate }: EditItemBut
                 id="edit_altText_ar"
                 value={altTextAr}
                 onChange={(e) => setAltTextAr(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+          </>
+        );
+      case 'coupons':
+        return (
+          <>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit_name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="edit_name"
+                value={nameEn}
+                onChange={(e) => setNameEn(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit_code" className="text-right">
+                Code
+              </Label>
+              <Input
+                id="edit_code"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit_discount" className="text-right">
+                Discount (%)
+              </Label>
+              <Input
+                id="edit_discount"
+                type="number"
+                value={discount}
+                onChange={(e) => setDiscount(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit_expiryDate" className="text-right">
+                Expiry Date
+              </Label>
+              <Input
+                id="edit_expiryDate"
+                type="date"
+                value={expiryDate}
+                onChange={(e) => setExpiryDate(e.target.value)}
                 className="col-span-3"
               />
             </div>

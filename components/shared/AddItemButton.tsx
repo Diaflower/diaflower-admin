@@ -1,13 +1,13 @@
 'use client';
 
-import { useState , useRef } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { PlusIcon } from 'lucide-react';
-import { addItem } from '@/data/categoriesOrTags';
+import { addItem, addCoupon } from '@/data/categoriesOrTags';
 import { toast } from "@/components/ui/use-toast";
 import { useQueryClient } from '@tanstack/react-query';
 import { ColorPicker } from './ColorPicker';
@@ -27,13 +27,25 @@ export default function AddItemButton({ itemType }: AddItemButtonProps) {
   const [altTextAr, setAltTextAr] = useState('');
   const [color, setColor] = useState('#000000');
   const [image, setImage] = useState<File | null>(null);
+  const [code, setCode] = useState('');
+  const [discount, setDiscount] = useState('');
+  const [expiryDate, setExpiryDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
-
+ 
   const handleAddItem = async () => {
-    if (!nameEn || !nameAr) {
+    if (itemType === 'coupons') {
+      if (!nameEn || !code || !discount || !expiryDate) {
+        toast({
+          title: "Error",
+          description: "All fields are required for coupons.",
+          variant: "destructive",
+        });
+        return;
+      }
+    } else if (!nameEn || !nameAr) {
       toast({
         title: "Error",
         description: "Both English and Arabic names are required.",
@@ -42,7 +54,7 @@ export default function AddItemButton({ itemType }: AddItemButtonProps) {
       return;
     }
 
-    if (itemType === 'infinityColors' || itemType === 'boxColors') {
+    if (itemType === 'infinityColors' || itemType === 'boxColors' || itemType === 'wrappingColors') {
       if (!color || !image) {
         toast({
           title: "Error",
@@ -59,7 +71,15 @@ export default function AddItemButton({ itemType }: AddItemButtonProps) {
       if (!token) throw new Error('No authentication token available');
       
       let data: any;
-      if (itemType === 'infinityColors' || itemType === 'boxColors') {
+      if (itemType === 'coupons') {
+        data = {
+          name: nameEn,
+          code,
+          discount: parseFloat(discount),
+          expiryDate: new Date(expiryDate).toISOString(),
+        };
+        await addCoupon(data, token);
+      } else if (itemType === 'infinityColors' || itemType === 'boxColors' || itemType === 'wrappingColors') {
         const formData = new FormData();
         formData.append('name_en', nameEn);
         formData.append('name_ar', nameAr);
@@ -68,11 +88,12 @@ export default function AddItemButton({ itemType }: AddItemButtonProps) {
         formData.append('altText_en', altTextEn);
         formData.append('altText_ar', altTextAr);
         data = formData;
+        await addItem(itemType, data, token);
       } else {
         data = { name_en: nameEn, name_ar: nameAr };
+        await addItem(itemType, data, token);
       }
       
-      await addItem(itemType, data, token);
       setIsOpen(false);
       resetForm();
       toast({
@@ -103,12 +124,16 @@ export default function AddItemButton({ itemType }: AddItemButtonProps) {
     setImage(null);
     setAltTextEn('');
     setAltTextAr('');
+    setCode('');
+    setDiscount('');
+    setExpiryDate('');
   };
 
   const renderFormFields = () => {
     switch (itemType) {
       case 'infinityColors':
       case 'boxColors':
+      case 'wrappingColors':
         return (
           <>
             <div className="grid grid-cols-4 items-center gap-4">
@@ -175,6 +200,57 @@ export default function AddItemButton({ itemType }: AddItemButtonProps) {
                 id="altText_ar"
                 value={altTextAr}
                 onChange={(e) => setAltTextAr(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+          </>
+        );
+      case 'coupons':
+        return (
+          <>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="name"
+                value={nameEn}
+                onChange={(e) => setNameEn(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="code" className="text-right">
+                Code
+              </Label>
+              <Input
+                id="code"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="discount" className="text-right">
+                Discount (%)
+              </Label>
+              <Input
+                id="discount"
+                type="number"
+                value={discount}
+                onChange={(e) => setDiscount(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="expiryDate" className="text-right">
+                Expiry Date
+              </Label>
+              <Input
+                id="expiryDate"
+                type="date"
+                value={expiryDate}
+                onChange={(e) => setExpiryDate(e.target.value)}
                 className="col-span-3"
               />
             </div>

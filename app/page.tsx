@@ -1,11 +1,8 @@
-
-import { auth, currentUser } from '@clerk/nextjs/server'
+import { auth } from '@clerk/nextjs/server'
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-
 export default function DashboardPage() {
-
   const { userId } = auth();
 
   if (!userId) {
@@ -13,15 +10,15 @@ export default function DashboardPage() {
   }
   
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+    <div>
+      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Total Revenue</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">$12,345</p>
+            <p className="text-3xl font-bold">$12,345</p>
           </CardContent>
         </Card>
         <Card>
@@ -29,7 +26,7 @@ export default function DashboardPage() {
             <CardTitle>Total Orders</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">123</p>
+            <p className="text-3xl font-bold">123</p>
           </CardContent>
         </Card>
         <Card>
@@ -37,7 +34,7 @@ export default function DashboardPage() {
             <CardTitle>New Customers</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">45</p>
+            <p className="text-3xl font-bold">45</p>
           </CardContent>
         </Card>
         <Card>

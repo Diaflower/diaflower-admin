@@ -1,166 +1,266 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { fetchItems, deleteItem } from '@/data/categoriesOrTags';
-import DeleteItemButton from './DeleteItemButton';
-import EditItemButton from './EditItemButton';
-import { Item ,ItemType} from '@/types/types';
-import { useAuth } from '@clerk/nextjs';
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { fetchItems, deleteItem, deleteCoupon } from '@/data/categoriesOrTags'
+import { fetchAddons, fetchProducts, deleteAddon, deleteProduct } from '@/data/products'
+import DeleteItemButton from './DeleteItemButton'
+import EditItemButton from './EditItemButton'
+import { Item, ItemType, Coupon } from '@/types/types'
+import { useAuth } from '@clerk/nextjs'
+import Link from 'next/link'
+import { ChevronLeftIcon, ChevronRightIcon, Pencil, Trash2 } from 'lucide-react'
 
 interface DataTableProps {
   initialItems: {
-    items: Item[];
-    totalPages: number;
-  };
-  itemType: ItemType;
+    items: (Item | Coupon)[]
+    totalPages: number
+  }
+  itemType: ItemType
 }
 
 export default function DataTable({ initialItems, itemType }: DataTableProps) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const { getToken } = useAuth();
+  const [currentPage, setCurrentPage] = useState(1)
+  const { getToken } = useAuth()
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: [itemType, currentPage],
     queryFn: async () => {
-      const token = await getToken();
-      if (!token) throw new Error('No authentication token available');
-      return fetchItems(itemType, currentPage, 10, token);
+      const token = await getToken()
+      if (!token) throw new Error('No authentication token available')
+      if (itemType === 'products') {
+        return fetchProducts(currentPage, 10, token)
+      } else if (itemType === 'addons') {
+        return fetchAddons(currentPage, 10, token)
+      } else {
+        return fetchItems(itemType, currentPage, 10, token)
+      }
     },
     initialData: initialItems,
-  });
+  })
 
-  const handleDeleteItem = async (id: number) => {
+  const handleDeleteItem = async (id: number | string) => {
     try {
-      const token = await getToken();
-      if (!token) throw new Error('No authentication token available');
-      await deleteItem(itemType, id, token);
-      refetch();
+      const token = await getToken()
+      if (!token) throw new Error('No authentication token available')
+      
+      if (itemType === 'products') {
+        await deleteProduct(id as number, token)
+      } else if (itemType === 'addons') {
+        await deleteAddon(id as number, token)
+      } else if (itemType === 'coupons') {
+        await deleteCoupon(id as string, token)
+      } else {
+        await deleteItem(itemType, id as number, token)
+      }
+      
+      refetch()
     } catch (error) {
-      console.error("Error deleting item:", error);
+      console.error("Error deleting item:", error)
     }
-  };
+  }
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {(error as Error).message}</div>;
+  if (isLoading) return <div className="flex items-center justify-center h-64">Loading...</div>
+  if (error) return <div className="flex items-center justify-center h-64 text-red-500">Error: {(error as Error).message}</div>
 
-  const items = data?.items || [];
-  const totalPages = data?.totalPages || 1;
+  const items = data?.items || []
+  const totalPages = data?.totalPages || 1
 
   const renderTableHeaders = () => {
     switch (itemType) {
       case 'infinityColors':
       case 'boxColors':
+      case 'wrappingColors':
         return (
           <>
-            <TableHead>ID</TableHead>
+            <TableHead className="w-[100px]">ID</TableHead>
             <TableHead>Color</TableHead>
             <TableHead>Image</TableHead>
             <TableHead>Alt Text (EN)</TableHead>
             <TableHead>Alt Text (AR)</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </>
-        );
-      case 'usedFlowers':
-      case 'categories':
-      case 'tags':
-      case 'productTypes':
-      case 'sizes':
+        )
+      case 'products':
+        return (
+          <>
+            <TableHead className="w-[100px]">ID</TableHead>
+            <TableHead>Name (English)</TableHead>
+            <TableHead>Name (Arabic)</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Category</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </>
+        )
+      case 'addons':
+        return (
+          <>
+            <TableHead className="w-[100px]">ID</TableHead>
+            <TableHead>Name (English)</TableHead>
+            <TableHead>Name (Arabic)</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </>
+        )
+      case 'coupons':
+        return (
+          <>
+            <TableHead className="w-[100px]">ID</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead>Code</TableHead>
+            <TableHead>Discount</TableHead>
+            <TableHead>Expiry Date</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </>
+        )
       default:
         return (
           <>
-            <TableHead>ID</TableHead>
+            <TableHead className="w-[100px]">ID</TableHead>
             <TableHead>Name (English)</TableHead>
             <TableHead>Name (Arabic)</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </>
-        );
+        )
     }
-  };
+  }
 
-  const renderTableRow = (item: Item) => {
+  const renderTableRow = (item: Item | Coupon) => {
     switch (itemType) {
       case 'infinityColors':
       case 'boxColors':
+      case 'wrappingColors':
+        const colorItem = item as Item
         return (
           <>
-            <TableCell>{item.id}</TableCell>
+            <TableCell>{colorItem.id}</TableCell>
             <TableCell>
               <div
                 className="w-6 h-6 rounded-full"
-                style={{ backgroundColor: item.color }}
+                style={{ backgroundColor: colorItem.color }}
               ></div>
             </TableCell>
             <TableCell>
-              {item.image && (
-                <img src={item.image.url} alt={item.image.altText_en} className="w-10 h-10 object-cover" />
+              {colorItem.image && (
+                <img 
+                  src={colorItem.image.url} 
+                  alt={colorItem.image.altText_en || ''} 
+                  className="w-10 h-10 object-cover rounded" 
+                />
               )}
             </TableCell>
-            <TableCell>{item.image?.altText_en}</TableCell>
-            <TableCell>{item.image?.altText_ar}</TableCell>
+            <TableCell>{colorItem.image?.altText_en}</TableCell>
+            <TableCell>{colorItem.image?.altText_ar}</TableCell>
           </>
-        );
-      case 'usedFlowers':
-      case 'categories':
-      case 'tags':
-      case 'productTypes':
-      case 'sizes':
-      default:
+        )
+      case 'products':
+        const productItem = item as Item
         return (
           <>
-            <TableCell>{item.id}</TableCell>
-            <TableCell>{item.name_en}</TableCell>
-            <TableCell>{item.name_ar}</TableCell>
+            <TableCell>{productItem.id}</TableCell>
+            <TableCell>{productItem.name_en}</TableCell>
+            <TableCell>{productItem.name_ar}</TableCell>
+            <TableCell>{productItem.status}</TableCell>
+            <TableCell>{productItem.category?.name_en}</TableCell>
           </>
-        );
+        )
+      case 'addons':
+        const addonItem = item as Item
+        return (
+          <>
+            <TableCell>{addonItem.id}</TableCell>
+            <TableCell>{addonItem.name_en}</TableCell>
+            <TableCell>{addonItem.name_ar}</TableCell>
+          </>
+        )
+      case 'coupons':
+        const couponItem = item as Coupon
+        return (
+          <>
+            <TableCell>{couponItem.id}</TableCell>
+            <TableCell>{couponItem.name}</TableCell>
+            <TableCell>{couponItem.code}</TableCell>
+            <TableCell>{couponItem.discount}%</TableCell>
+            <TableCell>{new Date(couponItem.expiryDate).toLocaleDateString()}</TableCell>
+          </>
+        )
+      default:
+        const defaultItem = item as Item
+        return (
+          <>
+            <TableCell>{defaultItem.id}</TableCell>
+            <TableCell>{defaultItem.name_en}</TableCell>
+            <TableCell>{defaultItem.name_ar}</TableCell>
+          </>
+        )
     }
-  };
+  }
 
   return (
-    <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {renderTableHeaders()}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((item: Item) => (
-            <TableRow key={item.id}>
-              {renderTableRow(item)}
-              <TableCell>
-                <div className="flex space-x-2">
-                  <EditItemButton
-                    item={item}
-                    itemType={itemType}
-                    onUpdate={() => refetch()}
-                  />
-                  <DeleteItemButton item={item} itemType={itemType} onDelete={handleDeleteItem} />
-                </div>
-              </TableCell>
+    <div className="space-y-4">
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {renderTableHeaders()}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      <div className="flex justify-center mt-4 space-x-2">
+          </TableHeader>
+          <TableBody>
+            {items.map((item: Item | Coupon) => (
+              <TableRow key={item.id}>
+                {renderTableRow(item)}
+                <TableCell className="text-right">
+                  <div className="flex justify-end space-x-2">
+                    {itemType === 'products' || itemType === 'addons' ? (
+                      <>
+                        <Link href={`/${itemType}/edit/${item.id}`} passHref>
+                          <Button variant="outline" size="sm">
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <DeleteItemButton item={item} itemType={itemType} onDelete={handleDeleteItem} />
+                      </>
+                    ) : (
+                      <>
+                        <EditItemButton
+                          item={item}
+                          itemType={itemType}
+                          onUpdate={() => refetch()}
+                        />
+                        <DeleteItemButton item={item} itemType={itemType} onDelete={handleDeleteItem} />
+                      </>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex items-center justify-center space-x-2">
         <Button
+          variant="outline"
+          size="sm"
           onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
         >
+          <ChevronLeftIcon className="h-4 w-4" />
           Previous
         </Button>
-        <span className="py-2 px-4 bg-muted rounded">
+        <span className="text-sm text-muted-foreground">
           Page {currentPage} of {totalPages}
         </span>
         <Button
+          variant="outline"
+          size="sm"
           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages}
         >
           Next
+          <ChevronRightIcon className="h-4 w-4" />
         </Button>
       </div>
-    </>
-  );
+    </div>
+  )
 }
