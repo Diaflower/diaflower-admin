@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { UserButton, useAuth } from "@clerk/nextjs"
+import { SignOutButton, UserButton, useAuth } from "@clerk/nextjs"
 import { useQuery } from '@tanstack/react-query'
 import { 
   HomeIcon, 
@@ -30,6 +30,7 @@ import { fetchUserData } from '@/data/user'
 export default function Sidebar() {
   const [openSection, setOpenSection] = useState<string | null>(null)
   const { isLoaded, userId, getToken } = useAuth()
+  console.log("userid",userId)
 
   const { data: userData, isLoading, isError } = useQuery({
     queryKey: ['userData'],
@@ -41,6 +42,7 @@ export default function Sidebar() {
     enabled: isLoaded && !!userId,
   })
 
+  console.log("datauser",userData)
   const toggleSection = (section: string) => {
     setOpenSection(openSection === section ? null : section)
   }
@@ -203,6 +205,7 @@ export default function Sidebar() {
         )}
       </nav>
       <div className="p-4 border-t flex items-center justify-between">
+        <SignOutButton />
         <UserButton afterSignOutUrl="/sign-in" />
         <Button variant="ghost" size="icon" aria-label="Notifications">
           <Bell className="h-5 w-5" />

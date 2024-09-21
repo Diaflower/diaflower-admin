@@ -196,7 +196,7 @@ export default function DataTable({ initialItems, itemType }: DataTableProps) {
         )
     }
   }
-
+  console.log("iteeeeems:::",items)
   return (
     <div className="space-y-4">
       <div className="rounded-md border">

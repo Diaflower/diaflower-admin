@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,8 +24,8 @@ export default function EditItemButton({ item, itemType, onUpdate }: EditItemBut
   const [isOpen, setIsOpen] = useState(false);
   const [nameEn, setNameEn] = useState((item as Item).name_en || (item as Coupon).name || '');
   const [nameAr, setNameAr] = useState((item as Item).name_ar || '');
-  const [altTextEn, setAltTextEn] = useState((item as Item).altText_en || '');
-  const [altTextAr, setAltTextAr] = useState((item as Item).altText_ar || '');
+  const [altTextEn, setAltTextEn] = useState((item as Item).image?.altText_en || '');
+  const [altTextAr, setAltTextAr] = useState((item as Item).image?.altText_ar || '');
   const [color, setColor] = useState((item as Item).color || '');
   const [image, setImage] = useState<File | null>(null);
   const [code, setCode] = useState((item as Coupon).code || '');
@@ -33,6 +33,12 @@ export default function EditItemButton({ item, itemType, onUpdate }: EditItemBut
   const [expiryDate, setExpiryDate] = useState((item as Coupon).expiryDate ? new Date((item as Coupon).expiryDate).toISOString().split('T')[0] : '');
   const [isLoading, setIsLoading] = useState(false);
   const { getToken } = useAuth();
+
+  useEffect(() => {
+    console.log('Item:', item);
+    console.log('Alt Text EN:', (item as Item).image?.altText_en);
+    console.log('Alt Text AR:', (item as Item).image?.altText_ar);
+  }, [item]);
 
   const handleUpdateItem = async () => {
     if (itemType === 'coupons') {
@@ -75,19 +81,19 @@ export default function EditItemButton({ item, itemType, onUpdate }: EditItemBut
           discount: parseFloat(discount),
           expiryDate: new Date(expiryDate).toISOString(),
         };
-        await updateCoupon(item.id as string, data, token);
+        await updateCoupon(item.id, data, token);
       } else if (itemType === 'infinityColors' || itemType === 'boxColors' || itemType === 'wrappingColors') {
         const formData = new FormData();
         formData.append('name_en', nameEn);
         formData.append('name_ar', nameAr);
         formData.append('color', color);
+        formData.append('altText_en', altTextEn);
+        formData.append('altText_ar', altTextAr);
         
         if (image instanceof File) {
           formData.append('image', image);
         }
   
-        formData.append('altText_en', altTextEn);
-        formData.append('altText_ar', altTextAr);
         data = formData;
         await updateItem(itemType, item.id as number, data, token);
       } else {

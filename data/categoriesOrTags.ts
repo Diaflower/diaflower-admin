@@ -48,7 +48,7 @@ export const addCoupon = async (data: any, token: string) => {
   return response.data;
 };
 
-export const updateCoupon = async (id: string, data: any, token: string) => {
+export const updateCoupon = async (id: number, data: any, token: string) => {
   api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   const response = await api.patch(`/coupons/update/${id}`, data);
   return response.data;

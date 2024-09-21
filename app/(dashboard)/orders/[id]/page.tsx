@@ -78,7 +78,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
             <div className="space-y-2">
               <p><strong>Order ID:</strong> {order.id}</p>
               <p><strong>Date:</strong> {format(new Date(order.createdAt), 'PPP')}</p>
-              <p><strong>Status:</strong> <OrderStatusBadge status={order.status} /></p>
+              <div><strong>Status:</strong> <OrderStatusBadge status={order.status} /></div>
               <p><strong>Total:</strong> AED{(+order.total).toFixed(2)}</p>
               <p><strong>Processed By:</strong> {order.processedBy || 'Not processed yet'}</p>
             </div>
@@ -104,9 +104,9 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
           <CardTitle>Shipping Address</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>{order.shippingAddress.addressLine1}</p>
-          <p>{order.shippingAddress.state}, {order.shippingAddress.country} {order.shippingAddress.postalCode}</p>
-          <p>{order.shippingAddress.phone}</p>
+          <p><strong>Address:</strong> {order.shippingAddress.addressLine1}</p>
+          <p><strong>State:</strong> {order.shippingAddress.state}, {order.shippingAddress.country} {order.shippingAddress.postalCode}</p>
+          <p><strong>Recepient Number:</strong> {order.shippingAddress.phone}</p>
         </CardContent>
       </Card>
 
@@ -146,10 +146,10 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
                     </div>
                   </TableCell>
                   <TableCell>
-                    <p>{item.productVariation.size?.name_en || 'N/A'}</p>
-                    <p>{item.productVariation.infinityColor?.name_en || 'N/A'}</p>
-                    <p>{item.productVariation.boxColor?.name_en || 'N/A'}</p>
-                    <p>{item.productVariation.wrappingColor?.name_en || 'N/A'}</p>
+                    {item.productVariation.size?.name_en && <p><strong>Size:</strong> {item.productVariation.size?.name_en}</p>}
+                    {item.productVariation.infinityColor?.name_en && <p><strong>Infinity:</strong> {item.productVariation.infinityColor?.name_en}</p>}
+                    {item.productVariation.boxColor?.name_en && <p><strong>Box:</strong> {item.productVariation.boxColor?.name_en}</p>}
+                    {item.productVariation.wrappingColor?.name_en && <p><strong>Wrapping:</strong> {item.productVariation.wrappingColor?.name_en}</p>}
                   </TableCell>
                   <TableCell>{item.quantity}</TableCell>
                   <TableCell>AED{(+item.price).toFixed(2)}</TableCell>
