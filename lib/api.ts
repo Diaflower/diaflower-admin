@@ -1,7 +1,8 @@
 // src/lib/api.ts
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { API_URL } from './staticData';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+// const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: API_URL,

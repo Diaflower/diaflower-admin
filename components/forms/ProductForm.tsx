@@ -16,102 +16,14 @@ import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import Image from 'next/image'
-
-const API_BASE_URL = 'http://localhost:3001/api'
-
+import { API_URL } from '@/lib/staticData'
+import { Category ,ProductSize,InfinityColor,BoxColor,WrappingColor,ProductTag,Addon } from '@/types/types'
+import { productFormSchema } from '@/data/schemas/productSchema'
 type ProductType = 'LONG_LIFE' | 'BOUQUET' | 'ARRANGEMENT' | 'ACRYLIC_BOX'
 type ProductStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
 
-interface Category {
-  id: number
-  name_en: string
-  name_ar: string
-}
 
-interface ProductSize {
-  id: number
-  name_en: string
-  name_ar: string
-}
-
-interface InfinityColor {
-  id: number
-  name_en: string
-  name_ar: string
-  color?: string
-}
-
-interface BoxColor {
-  id: number
-  name_en: string
-  name_ar: string
-  color?: string
-}
-
-interface WrappingColor {
-  id: number
-  name_en: string
-  name_ar: string
-  color?: string
-}
-
-interface ProductTag {
-  id: number
-  name_en: string
-  name_ar: string
-}
-
-interface Addon {
-  id: number
-  name_en: string
-  name_ar: string
-}
-
-const formSchema = z.object({
-  code: z.string().optional(),
-  name_en: z.string().min(2, 'Name (EN) is required'),
-  name_ar: z.string().min(2, 'Name (AR) is required'),
-  slug: z.string().min(2, 'Slug is required'),
-  shortDescription_en: z.string().min(10, 'Short description (EN) is required'),
-  shortDescription_ar: z.string().min(10, 'Short description (AR) is required'),
-  longDescription_en: z.string().min(20, 'Long description (EN) is required'),
-  longDescription_ar: z.string().min(20, 'Long description (AR) is required'),
-  metaTitle_en: z.string().optional(),
-  metaTitle_ar: z.string().optional(),
-  metaDescription_en: z.string().optional(),
-  metaDescription_ar: z.string().optional(),
-  featured: z.boolean(),
-  status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']),
-  productType: z.enum(['LONG_LIFE', 'BOUQUET', 'ARRANGEMENT', 'ACRYLIC_BOX']),
-  categoryId: z.number().nullable(),
-
-  mainImage: z.object({
-    image: z.any().nullable(),
-    altText_en: z.string().optional().nullable(),
-    altText_ar: z.string().optional().nullable(),
-  }),
-  variations: z.array(z.object({
-    sku: z.string(),
-    barcode: z.string().optional().nullable(),
-    price: z.number().min(0),
-    previousPrice: z.number().min(0).optional().nullable(),
-    inStock: z.boolean(),
-    weight: z.number().optional().nullable(),
-    sizeId: z.number().optional().nullable(),
-    infinityColorId: z.number().optional().nullable(),
-    boxColorId: z.number().optional().nullable(),
-    wrappingColorId: z.number().optional().nullable(),
-    isDefault: z.boolean(),
-    image: z.object({
-      image: z.any().nullable(),
-      altText_en: z.string().optional().nullable(),
-      altText_ar: z.string().optional().nullable(),
-    }).optional().nullable(),
-  })),
-  tagIds: z.array(z.number()),
-  addonIds: z.array(z.number()),
-})
-
+const formSchema = productFormSchema
 export default function ProductForm({ productId }: { productId?: number }) {
   const { getToken } = useAuth()
   const router = useRouter()
@@ -188,13 +100,13 @@ export default function ProductForm({ productId }: { productId?: number }) {
           tagsRes,
           addonsRes
         ] = await Promise.all([
-          axios.get(`${API_BASE_URL}/categories/getAll`, axiosConfig),
-          axios.get(`${API_BASE_URL}/productSizes/getAll`, axiosConfig),
-          axios.get(`${API_BASE_URL}/infinitycolors/getAll`, axiosConfig),
-          axios.get(`${API_BASE_URL}/boxcolors/getAll`, axiosConfig),
-          axios.get(`${API_BASE_URL}/wrappingcolors/getAll`, axiosConfig),
-          axios.get(`${API_BASE_URL}/tags/getAll`, axiosConfig),
-          axios.get(`${API_BASE_URL}/addons/getAll`, axiosConfig)
+          axios.get(`${API_URL}/categories/getAll`, axiosConfig),
+          axios.get(`${API_URL}/productSizes/getAll`, axiosConfig),
+          axios.get(`${API_URL}/infinitycolors/getAll`, axiosConfig),
+          axios.get(`${API_URL}/boxcolors/getAll`, axiosConfig),
+          axios.get(`${API_URL}/wrappingcolors/getAll`, axiosConfig),
+          axios.get(`${API_URL}/tags/getAll`, axiosConfig),
+          axios.get(`${API_URL}/addons/getAll`, axiosConfig)
         ])
 
         setCategories(categoriesRes.data.items)
@@ -220,7 +132,7 @@ export default function ProductForm({ productId }: { productId?: number }) {
         if (!token) return
   
         try {
-          const response = await axios.get(`${API_BASE_URL}/products/getById/${productId}`, {
+          const response = await axios.get(`${API_URL}/products/getById/${productId}`, {
             headers: {
               'Authorization': `Bearer ${token}`
             }
@@ -301,8 +213,8 @@ export default function ProductForm({ productId }: { productId?: number }) {
 
     try {
       const url = productId
-        ? `${API_BASE_URL}/products/update/${productId}`
-        : `${API_BASE_URL}/products/create`
+        ? `${API_URL}/products/update/${productId}`
+        : `${API_URL}/products/create`
 
       const response = await axios({
         method: productId ? 'put' : 'post',
@@ -540,72 +452,7 @@ export default function ProductForm({ productId }: { productId?: number }) {
             </FormItem>
           )}
         />
-        {/* <FormField
-          control={form.control}
-          name={`variations.${index}.image.image`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Variation Image</FormLabel>
-              <FormControl>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) {
-                      field.onChange(file)
-                      const reader = new FileReader()
-                      reader.onloadend = () => {
-                        setVariationImagePreviews(prev => {
-                          const newPreviews = [...prev]
-                          newPreviews[index] = reader.result as string
-                          return newPreviews
-                        })
-                      }
-                      reader.readAsDataURL(file)
-                    }
-                  }}
-                />
-              </FormControl>
-              {variationImagePreviews[index] && (
-                <Image
-                  src={variationImagePreviews[index]}
-                  alt={`Variation ${index + 1}`}
-                  width={100}
-                  height={100}
-                  className="mt-2"
-                />
-              )}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name={`variations.${index}.image.altText_en`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Variation Image Alt Text (EN)</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name={`variations.${index}.image.altText_ar`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Variation Image Alt Text (AR)</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        /> */}
+
         <FormField
         control={form.control}
         name={`variations.${index}.image.image`}

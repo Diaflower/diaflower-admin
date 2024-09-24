@@ -190,3 +190,57 @@ export interface OrdersResponse {
   currentPage: number;
 }
 
+
+
+
+
+
+
+
+// products related:
+
+
+export interface Category {
+  id: number
+  name_en: string
+  name_ar: string
+}
+
+export interface ProductSize {
+  id: number
+  name_en: string
+  name_ar: string
+}
+
+export interface InfinityColor {
+  id: number
+  name_en: string
+  name_ar: string
+  color?: string
+}
+
+export interface BoxColor {
+  id: number
+  name_en: string
+  name_ar: string
+  color?: string
+}
+
+export interface WrappingColor {
+  id: number
+  name_en: string
+  name_ar: string
+  color?: string
+}
+
+export interface ProductTag {
+  id: number
+  name_en: string
+  name_ar: string
+}
+
+export interface Addon {
+  id: number
+  name_en: string
+  name_ar: string
+}

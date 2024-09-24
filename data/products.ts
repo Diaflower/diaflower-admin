@@ -3,49 +3,6 @@ import api from '@/lib/api';
 import { Product } from '@/types/types';
 
 
-
-
-// export const fetchProducts = async (page: number, pageSize: number, token: string) => {
-//   try {
-//     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-//     const response = await api.get(`/products/getAll`, {
-//       params: { page, pageSize }
-//     });
-//     return response.data;
-//   } catch(error) {
-//     console.error(error);
-//     return [];
-//   }
-// };
-
-// export const getProductById = async (id: number, token: string) => {
-//   try {
-//     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-//     const response = await api.get(`/products/getById/${id}`);
-//     return response.data;
-//   } catch (error) {
-//     console.error('Error fetching product:', error);
-//     throw error;
-//   }
-// };
-
-// export const createProduct = async (data: FormData, token: string) => {
-//   api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-//   const response = await api.postFormData('/products/create', data);
-//   return response.data;
-// };
-
-// export const updateProduct = async (id: number, data: FormData, token: string) => {
-//   api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-//   const response = await api.putFormData(`/products/update/${id}`, data);
-//   return response.data;
-// };
-
-// export const deleteProduct = async (id: number, token: string) => {
-//   api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-//   await api.delete(`/products/delete/${id}`);
-// };
-
 // Addon functions
 export const fetchAddons = async (page: number, pageSize: number, token: string) => {
   try {
