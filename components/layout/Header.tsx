@@ -5,6 +5,7 @@ import { Bell, Search } from "lucide-react"
 import Image from "next/image"
 
 export default function Header() {
+  // //////
   return (
     <header className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
