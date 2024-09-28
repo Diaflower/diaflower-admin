@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import Image from 'next/image';
 
 interface ImagePreviewProps {
     image: File | string | null;
@@ -13,7 +14,7 @@ interface ImagePreviewProps {
   
     return (
       <div className="relative inline-block">
-        <img src={imageUrl} alt="Preview" className="w-24 h-24 object-cover rounded" />
+        <Image src={imageUrl} alt="Preview" className="w-24 h-24 object-cover rounded" />
         <Button 
           variant="destructive" 
           size="sm" 

@@ -12,7 +12,7 @@ import { Item, ItemType, Coupon } from '@/types/types'
 import { useAuth } from '@clerk/nextjs'
 import Link from 'next/link'
 import { ChevronLeftIcon, ChevronRightIcon, Pencil, Trash2 } from 'lucide-react'
-
+import Image from 'next/image'
 interface DataTableProps {
   initialItems: {
     items: (Item | Coupon)[]
@@ -144,7 +144,7 @@ export default function DataTable({ initialItems, itemType }: DataTableProps) {
             </TableCell>
             <TableCell>
               {colorItem.image && (
-                <img 
+                <Image 
                   src={colorItem.image.url} 
                   alt={colorItem.image.altText_en || ''} 
                   className="w-10 h-10 object-cover rounded" 

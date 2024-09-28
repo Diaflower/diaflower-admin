@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { toast } from '@/components/ui/use-toast'
+import Image from 'next/image'
 
 const addonSchema = z.object({
   name_en: z.string().min(2, 'Name (English) is required'),
@@ -331,7 +332,7 @@ export default function AddonForm({ addonId, initialData }: AddonFormProps) {
             />
             {mainImagePreview && (
               <div className="mt-4">
-                <img src={mainImagePreview} alt="Main image preview" className="w-full max-w-md h-auto rounded-md" />
+                <Image src={mainImagePreview} alt="Main image preview" className="w-full max-w-md h-auto rounded-md" />
               </div>
             )}
           </CardContent>
@@ -508,7 +509,7 @@ export default function AddonForm({ addonId, initialData }: AddonFormProps) {
                 />
                 {variationImagePreviews[index] && (
                   <div className="mt-4">
-                    <img src={variationImagePreviews[index] || ''} alt={`Variation ${index + 1} preview`} className="w-full max-w-md h-auto rounded-md" />
+                    <Image src={variationImagePreviews[index] || ''} alt={`Variation ${index + 1} preview`} className="w-full max-w-md h-auto rounded-md" />
                   </div>
                 )}
               </div>

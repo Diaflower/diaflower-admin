@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Checkbox } from "@/components/ui/checkbox"
 import { toast } from '@/components/ui/use-toast'
+import Image from 'next/image'
 
 const productSchema = z.object({
   code: z.string().optional(),
@@ -581,7 +582,7 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
             />
             {mainImagePreview && (
               <div className="mt-4">
-                <img src={mainImagePreview} alt="Main image preview" className="w-full max-w-md h-auto rounded-md" />
+                <Image src={mainImagePreview} alt="Main image preview" className="w-full max-w-md h-auto rounded-md" />
               </div>
             )}
 
@@ -881,7 +882,7 @@ export default function ProductForm({ productId, initialData }: ProductFormProps
                     />
                     {variationImagePreviews[index] && (
                       <div className="mt-4">
-                        <img src={variationImagePreviews[index] || ''} alt={`Variation ${index + 1} preview`} className="w-full max-w-md h-auto rounded-md" />
+                        <Image src={variationImagePreviews[index] || ''} alt={`Variation ${index + 1} preview`} className="w-full max-w-md h-auto rounded-md" />
                       </div>
                     )}
                   </CardContent>
