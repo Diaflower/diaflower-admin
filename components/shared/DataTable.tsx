@@ -36,6 +36,7 @@ export default function DataTable({ initialItems, itemType }: DataTableProps) {
         return fetchAddons(currentPage, 10, token)
       } else {
         return fetchItems(itemType, currentPage, 10, token)
+       
       }
     },
     initialData: initialItems,
@@ -65,7 +66,7 @@ export default function DataTable({ initialItems, itemType }: DataTableProps) {
   if (isLoading) return <div className="flex items-center justify-center h-64">Loading...</div>
   if (error) return <div className="flex items-center justify-center h-64 text-red-500">Error: {(error as Error).message}</div>
 
-  const items = data?.items || []
+  const items = itemType === 'coupons'? data: data?.items || []
   const totalPages = data?.totalPages || 1
 
   const renderTableHeaders = () => {

@@ -38,6 +38,7 @@ export default function ItemsPage({ itemType }: ItemsPageProps) {
     enabled: isLoaded && !!userId,
   })
 
+  console.log("hehehehe",data)
   if (!isLoaded || !userId) {
     return <div className="flex items-center justify-center h-full">Loading authentication...</div>
   }
@@ -48,6 +49,7 @@ export default function ItemsPage({ itemType }: ItemsPageProps) {
 
   const capitalizedItemType = itemType.charAt(0).toUpperCase() + itemType.slice(1)
 
+  console.log("data::::heheher",data)
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -66,7 +68,7 @@ export default function ItemsPage({ itemType }: ItemsPageProps) {
       <Suspense fallback={<div className="flex items-center justify-center h-64">Loading...</div>}>
         {isLoading ? (
           <div className="flex items-center justify-center h-64">Loading...</div>
-        ) : data && data.items?.length > 0 ? (
+        ) : data && data.items?.length > 0 || data.length > 0 ? (
           <DataTable initialItems={data} itemType={itemType} />
         ) : (
           <div className="text-center py-10">
