@@ -65,7 +65,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
 
   return (
     <div className="container mx-auto py-10">
-      <Button variant="ghost" onClick={() => router.push('/orders')} className="mb-6">
+      <Button variant="ghost" onClick={() => router.push('/orders/daily-orders')} className="mb-6">
         <ArrowLeft className="mr-2 h-4 w-4" /> Back to Orders
       </Button>
       
