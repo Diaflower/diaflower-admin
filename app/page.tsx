@@ -8,6 +8,8 @@ import { redirect } from "next/navigation";
 
 export default function HomePage() {
   // const { userId } = auth();
+  // const { userId } = auth();
+
   const { isLoaded, userId, getToken } = useAuth()
 
   const { data: userData, isLoading, isError } = useQuery({
