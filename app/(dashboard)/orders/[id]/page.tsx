@@ -29,6 +29,7 @@ const statusColors: Record<OrderStatus, string> = {
   [OrderStatus.ON_DELIVERY]: 'bg-purple-500',
   [OrderStatus.DELIVERED]: 'bg-gray-500',
   [OrderStatus.CANCELLED]: 'bg-red-700',
+  [OrderStatus.CASH_PAYMENT]: 'bg-green-700',
 }
 
 const OrderStatusBadge = ({ status }: { status: OrderStatus }) => (

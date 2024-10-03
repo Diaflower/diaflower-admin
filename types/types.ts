@@ -93,7 +93,8 @@ export enum OrderStatus {
   PROCESSING = 'PROCESSING',
   ON_DELIVERY = 'ON_DELIVERY',
   DELIVERED = 'DELIVERED',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
+  CASH_PAYMENT= 'CASH_PAYMENT'
 }
 
 export enum OrderHandler {
