@@ -77,6 +77,11 @@ export interface ProductVariation {
 }
 
 export interface Coupon {
+  maxUses: string;
+  isSpecial: boolean;
+  specialCustomer?: string;
+  specialEmail?: string;
+  specialPhone?: string;
   id: number;
   name: string;
   code: string;

@@ -13,6 +13,7 @@ import { Item, ItemType, Coupon } from '@/types/types';
 import { ColorPicker } from './ColorPicker';
 import { FileUpload } from './FileUpload';
 import { ImagePreview } from './ImagePreview';
+import { Switch } from "@/components/ui/switch";
 
 interface EditItemButtonProps {
   item: Item | Coupon;
@@ -31,6 +32,11 @@ export default function EditItemButton({ item, itemType, onUpdate }: EditItemBut
   const [code, setCode] = useState((item as Coupon).code || '');
   const [discount, setDiscount] = useState(((item as Coupon).discount || 0).toString());
   const [expiryDate, setExpiryDate] = useState((item as Coupon).expiryDate ? new Date((item as Coupon).expiryDate).toISOString().split('T')[0] : '');
+  const [maxUses, setMaxUses] = useState(((item as Coupon).maxUses || '').toString());
+  const [isSpecial, setIsSpecial] = useState((item as Coupon).isSpecial || false);
+  const [specialCustomer, setSpecialCustomer] = useState((item as Coupon).specialCustomer || '');
+  const [specialEmail, setSpecialEmail] = useState((item as Coupon).specialEmail || '');
+  const [specialPhone, setSpecialPhone] = useState((item as Coupon).specialPhone || '');
   const [isLoading, setIsLoading] = useState(false);
   const { getToken } = useAuth();
 
@@ -42,10 +48,10 @@ export default function EditItemButton({ item, itemType, onUpdate }: EditItemBut
 
   const handleUpdateItem = async () => {
     if (itemType === 'coupons') {
-      if (!nameEn || !code || !discount || !expiryDate) {
+      if (!nameEn || !code || !discount) {
         toast({
           title: "Error",
-          description: "All fields are required for coupons.",
+          description: "Name, code, and discount are required for coupons.",
           variant: "destructive",
         });
         return;
@@ -79,7 +85,12 @@ export default function EditItemButton({ item, itemType, onUpdate }: EditItemBut
           name: nameEn,
           code,
           discount: parseFloat(discount),
-          expiryDate: new Date(expiryDate).toISOString(),
+          expiryDate: expiryDate ? new Date(expiryDate).toISOString() : null,
+          maxUses: maxUses ? parseInt(maxUses) : undefined,
+          isSpecial,
+          specialCustomer: isSpecial ? specialCustomer : undefined,
+          specialEmail: isSpecial ? specialEmail : undefined,
+          specialPhone: isSpecial ? specialPhone : undefined,
         };
         await updateCoupon(item.id, data, token);
       } else if (itemType === 'infinityColors' || itemType === 'boxColors' || itemType === 'wrappingColors') {
@@ -248,6 +259,66 @@ export default function EditItemButton({ item, itemType, onUpdate }: EditItemBut
                 className="col-span-3"
               />
             </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit_maxUses" className="text-right">
+                Max Uses
+              </Label>
+              <Input
+                id="edit_maxUses"
+                type="number"
+                value={maxUses}
+                onChange={(e) => setMaxUses(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit_isSpecial" className="text-right">
+                Special Coupon
+              </Label>
+              <Switch
+                id="edit_isSpecial"
+                checked={isSpecial}
+                onCheckedChange={setIsSpecial}
+              />
+            </div>
+            {isSpecial && (
+              <>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit_specialCustomer" className="text-right">
+                    Customer ID
+                  </Label>
+                  <Input
+                    id="edit_specialCustomer"
+                    value={specialCustomer}
+                    onChange={(e) => setSpecialCustomer(e.target.value)}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit_specialEmail" className="text-right">
+                    Email
+                  </Label>
+                  <Input
+                    id="edit_specialEmail"
+                    type="email"
+                    value={specialEmail}
+                    onChange={(e) => setSpecialEmail(e.target.value)}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit_specialPhone" className="text-right">
+                    Phone
+                  </Label>
+                  <Input
+                    id="edit_specialPhone"
+                    value={specialPhone}
+                    onChange={(e) => setSpecialPhone(e.target.value)}
+                    className="col-span-3"
+                  />
+                </div>
+              </>
+            )}
           </>
         );
       default:

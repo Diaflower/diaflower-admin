@@ -1,5 +1,20 @@
 import api from '@/lib/api';
 
+
+export interface CreateCouponDTO {
+  name: string;
+  code: string;
+  discount: number;
+  expiryDate?: string | null;
+  maxUses?: number;
+  isSpecial?: boolean;
+  specialCustomer?: string;
+  specialEmail?: string;
+  specialPhone?: string;
+}
+
+export interface UpdateCouponDTO extends Partial<CreateCouponDTO> {}
+
 export const fetchItems = async (itemType: string, page: number, pageSize: number, token: string) => {
   try {
     api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -42,13 +57,13 @@ export const deleteItem = async (itemType: string, id: number, token: string) =>
 
 
 
-export const addCoupon = async (data: any, token: string) => {
+export const addCoupon = async (data: CreateCouponDTO, token: string) => {
   api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   const response = await api.post('/coupons/create', data);
   return response.data;
 };
 
-export const updateCoupon = async (id: number, data: any, token: string) => {
+export const updateCoupon = async (id: number, data: UpdateCouponDTO, token: string) => {
   api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   const response = await api.patch(`/coupons/update/${id}`, data);
   return response.data;

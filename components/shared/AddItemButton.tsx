@@ -14,6 +14,8 @@ import { ColorPicker } from './ColorPicker';
 import { FileUpload } from './FileUpload';
 import { ItemType } from '@/types/types';
 import { ImagePreview } from './ImagePreview';
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 
 interface AddItemButtonProps {
   itemType: ItemType
@@ -30,6 +32,11 @@ export default function AddItemButton({ itemType }: AddItemButtonProps) {
   const [code, setCode] = useState('');
   const [discount, setDiscount] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
+  const [maxUses, setMaxUses] = useState('');
+  const [isSpecial, setIsSpecial] = useState(false);
+  const [specialCustomer, setSpecialCustomer] = useState('');
+  const [specialEmail, setSpecialEmail] = useState('');
+  const [specialPhone, setSpecialPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const { getToken } = useAuth();
@@ -37,10 +44,10 @@ export default function AddItemButton({ itemType }: AddItemButtonProps) {
  
   const handleAddItem = async () => {
     if (itemType === 'coupons') {
-      if (!nameEn || !code || !discount || !expiryDate) {
+      if (!nameEn || !code || !discount) {
         toast({
           title: "Error",
-          description: "All fields are required for coupons.",
+          description: "Name, code, and discount are required for coupons.",
           variant: "destructive",
         });
         return;
@@ -76,7 +83,12 @@ export default function AddItemButton({ itemType }: AddItemButtonProps) {
           name: nameEn,
           code,
           discount: parseFloat(discount),
-          expiryDate: new Date(expiryDate).toISOString(),
+          expiryDate: expiryDate ? new Date(expiryDate).toISOString() : null,
+          maxUses: maxUses ? parseInt(maxUses) : undefined,
+          isSpecial,
+          specialCustomer: isSpecial ? specialCustomer : undefined,
+          specialEmail: isSpecial ? specialEmail : undefined,
+          specialPhone: isSpecial ? specialPhone : undefined,
         };
         await addCoupon(data, token);
       } else if (itemType === 'infinityColors' || itemType === 'boxColors' || itemType === 'wrappingColors') {
@@ -127,6 +139,11 @@ export default function AddItemButton({ itemType }: AddItemButtonProps) {
     setCode('');
     setDiscount('');
     setExpiryDate('');
+    setMaxUses('');
+    setIsSpecial(false);
+    setSpecialCustomer('');
+    setSpecialEmail('');
+    setSpecialPhone('');
   };
 
   const renderFormFields = () => {
@@ -254,6 +271,66 @@ export default function AddItemButton({ itemType }: AddItemButtonProps) {
                 className="col-span-3"
               />
             </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="maxUses" className="text-right">
+                Max Uses
+              </Label>
+              <Input
+                id="maxUses"
+                type="number"
+                value={maxUses}
+                onChange={(e) => setMaxUses(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="isSpecial" className="text-right">
+                Special Coupon
+              </Label>
+              <Switch
+                id="isSpecial"
+                checked={isSpecial}
+                onCheckedChange={setIsSpecial}
+              />
+            </div>
+            {isSpecial && (
+              <>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="specialCustomer" className="text-right">
+                    Customer ID
+                  </Label>
+                  <Input
+                    id="specialCustomer"
+                    value={specialCustomer}
+                    onChange={(e) => setSpecialCustomer(e.target.value)}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="specialEmail" className="text-right">
+                    Email
+                  </Label>
+                  <Input
+                    id="specialEmail"
+                    type="email"
+                    value={specialEmail}
+                    onChange={(e) => setSpecialEmail(e.target.value)}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="specialPhone" className="text-right">
+                    Phone
+                  </Label>
+                  <Input
+                    id="specialPhone"
+                    value={specialPhone}
+                    onChange={(e) => setSpecialPhone(e.target.value)}
+                    className="col-span-3"
+                  />
+                </div>
+              </>
+            )}
           </>
         );
       default:
