@@ -180,6 +180,8 @@ export interface Order {
     country: string;
     postalCode: string;
     phone:string;
+    firstName?:string;
+    lastName?:string; 
   };
   items: OrderItem[];
   coupon?: {

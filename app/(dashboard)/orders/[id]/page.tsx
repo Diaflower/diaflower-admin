@@ -108,6 +108,7 @@ export default function OrderDetailsPage({ params }: { params: { id: string } })
           <p><strong>Address:</strong> {order.shippingAddress.addressLine1}</p>
           <p><strong>State:</strong> {order.shippingAddress.state}, {order.shippingAddress.country} {order.shippingAddress.postalCode}</p>
           <p><strong>Recepient Number:</strong> {order.shippingAddress.phone}</p>
+          <p><strong>Recepient Name:</strong> {order.shippingAddress.firstName} {order.shippingAddress.lastName}</p>
         </CardContent>
       </Card>
 
